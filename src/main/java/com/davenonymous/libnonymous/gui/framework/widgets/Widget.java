@@ -2,6 +2,7 @@ package com.davenonymous.libnonymous.gui.framework.widgets;
 
 import com.davenonymous.libnonymous.gui.framework.GUI;
 import com.davenonymous.libnonymous.gui.framework.event.*;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -69,7 +70,7 @@ public class Widget {
 
     public List<String> getTooltipAsString() {
         //TODO Maybe false
-        return getTooltip().stream().map(t -> t.func_241878_f().toString()).collect(Collectors.toList());
+        return getTooltip().stream().map(t -> t.getVisualOrderText().toString()).collect(Collectors.toList());
     }
 
     public List<ITextComponent> getTooltip() {
@@ -116,14 +117,14 @@ public class Widget {
     public static int computeGuiScale(Minecraft mc) {
         int scaleFactor = 1;
 
-        int k = mc.gameSettings.guiScale;
+        int k = mc.options.guiScale;
 
         if (k == 0) {
             k = 1000;
         }
 
 
-        while (scaleFactor < k && mc.getMainWindow().getWidth() / (scaleFactor + 1) >= 320 && mc.getMainWindow().getHeight() / (scaleFactor + 1) >= 240) {
+        while (scaleFactor < k && mc.getWindow().getWidth() / (scaleFactor + 1) >= 320 && mc.getWindow().getHeight() / (scaleFactor + 1) >= 240) {
             ++scaleFactor;
         }
         return scaleFactor;
@@ -230,12 +231,12 @@ public class Widget {
      *
      * @param screen
      */
-    public void shiftAndDraw(Screen screen) {
+    public void shiftAndDraw(MatrixStack stack, Screen screen) {
         this.drawBeforeShift(screen);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(this.x, this.y, 0);
-        this.draw(screen);
-        RenderSystem.popMatrix();
+        stack.pushPose();
+        stack.translate(this.x, this.y, 0);
+        this.draw(stack, screen);
+        stack.popPose();
     }
 
     /**
@@ -257,7 +258,7 @@ public class Widget {
      *
      * @param screen
      */
-    public void draw(Screen screen) {
+    public void draw(MatrixStack stack, Screen screen) {
         //Logz.debug("Drawing widget: %s, x=%d, y=%d, width=%d, height=%d", this, layoutResult.getX(), layoutResult.getY(), layoutResult.getWidth(), layoutResult.getHeight());
     }
 

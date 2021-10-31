@@ -42,7 +42,7 @@ public class IngameMenuConfigButtonInjector {
         }
 
         public static void onPress(Button button) {
-            PacketOpenConfigGuiHandler.openConfigGuiForAll(Minecraft.getInstance().currentScreen);
+            PacketOpenConfigGuiHandler.openConfigGuiForAll(Minecraft.getInstance().screen);
         }
     }
 }

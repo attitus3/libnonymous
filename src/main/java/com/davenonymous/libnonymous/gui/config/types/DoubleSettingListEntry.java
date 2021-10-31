@@ -48,7 +48,7 @@ public class DoubleSettingListEntry extends SettingListEntry {
                 updateDefaultIconState();
                 hideErrorIcon();
             } catch(NumberFormatException e) {
-                showErrorIcon(I18n.format("libnonymous.config.error.invalid_decimal"));
+                showErrorIcon(I18n.get("libnonymous.config.error.invalid_decimal"));
             }
 
             return WidgetEventResult.CONTINUE_PROCESSING;

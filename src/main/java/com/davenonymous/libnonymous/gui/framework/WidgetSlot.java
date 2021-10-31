@@ -39,7 +39,7 @@ public class WidgetSlot extends SlotItemHandler {
     }
 
     @Override
-    public boolean isEnabled() {
+    public boolean isActive() {
         return enabled;
     }
 
@@ -67,31 +67,31 @@ public class WidgetSlot extends SlotItemHandler {
             return super.onTake(thePlayer, stack);
         }
 
-        int total = stack.getCount() + getStack().getCount();
+        int total = stack.getCount() + getItem().getCount();
         ItemStack before = stack.copy();
         ItemStack after = before.copy();
         after.setCount(total - before.getMaxStackSize());
 
         stack.setCount(before.getMaxStackSize());
-        this.putStack(after);
-        this.onSlotChanged();
+        this.set(after);
+        this.setChanged();
 
         return stack;
     }
 
     @Override
-    public boolean canTakeStack(PlayerEntity player) {
+    public boolean mayPickup(PlayerEntity player) {
         if(locked) {
             return false;
         }
 
         if(player != null) {
-            ItemStack mouseStack = player.inventory.getItemStack();
+            ItemStack mouseStack = player.inventory.getCarried();
             if(mouseStack.isEmpty()) {
                 return true;
             }
 
-            if(getStack().getCount() > getStack().getMaxStackSize()) {
+            if(getItem().getCount() > getItem().getMaxStackSize()) {
                 return false;
             }
         }
@@ -100,7 +100,7 @@ public class WidgetSlot extends SlotItemHandler {
     }
 
     @Override
-    public int getItemStackLimit(@Nonnull ItemStack stack) {
+    public int getMaxStackSize(@Nonnull ItemStack stack) {
         return 64;
     }
 }

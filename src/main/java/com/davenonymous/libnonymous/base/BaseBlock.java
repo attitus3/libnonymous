@@ -12,6 +12,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraftforge.common.extensions.IForgeBlock;
 
 import javax.annotation.Nullable;
 
@@ -28,11 +29,11 @@ public class BaseBlock extends Block {
     public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
         super.onNeighborChange(state, world, pos, neighbor);
 
-        if(world.isRemote()) {
+        if(world.isClientSide()) {
             return;
         }
 
-        TileEntity tileEntity = world.getTileEntity(pos);
+        TileEntity tileEntity = world.getBlockEntity(pos);
         if(!(tileEntity instanceof BaseTileEntity)) {
             return;
         }
@@ -55,19 +56,19 @@ public class BaseBlock extends Block {
     }
 
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        super.onBlockPlacedBy(world, pos, state, placer, stack);
+    public void setPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(world, pos, state, placer, stack);
 
-        if(!(world.getTileEntity(pos) instanceof BaseTileEntity)) {
+        if(!(world.getBlockEntity(pos) instanceof BaseTileEntity)) {
             return;
         }
 
-        BaseTileEntity baseTile = (BaseTileEntity) world.getTileEntity(pos);
+        BaseTileEntity baseTile = (BaseTileEntity) world.getBlockEntity(pos);
         baseTile.loadFromItem(stack);
     }
 
     public static Direction getFacingFromEntity(BlockPos clickedBlock, LivingEntity entity, boolean horizontalOnly) {
-        Direction result = Direction.getFacingFromVector((float) (entity.getPosX() - clickedBlock.getX()), (float) (entity.getPosY() - clickedBlock.getY()), (float) (entity.getPosZ() - clickedBlock.getZ()));
+        Direction result =   Direction.getNearest((float) (entity.getX() - clickedBlock.getX()), (float) (entity.getY() - clickedBlock.getY()), (float) (entity.getZ() - clickedBlock.getZ()));
         if(horizontalOnly && (result == Direction.UP || result == Direction.DOWN)) {
             return Direction.NORTH;
         }

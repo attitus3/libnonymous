@@ -1,6 +1,7 @@
 package com.davenonymous.libnonymous.gui.framework.widgets;
 
 import com.davenonymous.libnonymous.gui.framework.GUIHelper;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
@@ -41,13 +42,13 @@ public class WidgetImage extends Widget {
         return this;
     }
 
-    public void draw(Screen screen) {
-        RenderSystem.pushMatrix();
+    public void draw(MatrixStack stack, Screen screen) {
+        stack.pushPose();
         RenderSystem.enableBlend();
         RenderSystem.enableAlphaTest();
-        RenderSystem.translatef(0.0f, 0.0f, 2.0f);
+        stack.translate(0.0f, 0.0f, 2.0f);
 
-        screen.getMinecraft().getTextureManager().bindTexture(image);
+        screen.getMinecraft().getTextureManager().bind(image);
 
         // Draw the image
         if(color == null) {
@@ -67,7 +68,7 @@ public class WidgetImage extends Widget {
         RenderSystem.disableBlend();
         RenderSystem.disableAlphaTest();
 
-        RenderSystem.popMatrix();
+        stack.popPose();
     }
 
     protected void actuallyDraw() {

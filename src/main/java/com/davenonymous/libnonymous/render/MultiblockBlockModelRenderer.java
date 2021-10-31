@@ -28,7 +28,7 @@ public class MultiblockBlockModelRenderer {
     }
 
     private static void renderModel(MultiblockBlockModel model, MultiBlockModelWorldReader modelWorld, MatrixStack matrix, IRenderTypeBuffer buffer, int light, int overlay) {
-        BlockRendererDispatcher brd = Minecraft.getInstance().getBlockRendererDispatcher();
+        BlockRendererDispatcher brd = Minecraft.getInstance().getBlockRenderer();
 
         // Aaaand render
         Set<BlockPos> renderPositions = model.getRelevantPositions();
@@ -36,19 +36,19 @@ public class MultiblockBlockModelRenderer {
             BlockState state = model.blocks.get(pos);
 
             try {
-                matrix.push();
+                matrix.pushPose();
                 matrix.translate(pos.getX(), pos.getY(), pos.getZ());
 
                 if(modelWorld.getContextWorld() != null && modelWorld.getContextPos() != null) {
                     // TODO: Hacks hack hacks. Clean this up, make ambient occlusion work, use proper world references
-                    AmbientOcclusionStatus before = Minecraft.getInstance().gameSettings.ambientOcclusionStatus;
-                    Minecraft.getInstance().gameSettings.ambientOcclusionStatus = AmbientOcclusionStatus.OFF;
-                    brd.renderModel(state, modelWorld.getContextPos(), modelWorld.getContextWorld(), matrix, buffer.getBuffer(RenderType.getCutout()), false, rand, EmptyModelData.INSTANCE);
-                    Minecraft.getInstance().gameSettings.ambientOcclusionStatus = before;
+                    AmbientOcclusionStatus before = Minecraft.getInstance().options.ambientOcclusion;
+                    Minecraft.getInstance().options.ambientOcclusion = AmbientOcclusionStatus.OFF;
+                    brd.renderModel(state, modelWorld.getContextPos(), modelWorld.getContextWorld(), matrix, buffer.getBuffer(RenderType.cutout()), false, rand, EmptyModelData.INSTANCE);
+                    Minecraft.getInstance().options.ambientOcclusion = before;
                 } else {
                     brd.renderBlock(state, matrix, buffer, light, overlay, EmptyModelData.INSTANCE);
                 }
-                matrix.pop();
+                matrix.popPose();
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -1,6 +1,7 @@
 package com.davenonymous.libnonymous.gui.framework.widgets;
 
 import com.davenonymous.libnonymous.gui.framework.GUI;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -26,8 +27,8 @@ public class WidgetItemStack extends WidgetWithValue<ItemStack> {
 
     public void setValue(ItemStack stack) {
         if(!stack.isEmpty()) {
-            ITooltipFlag.TooltipFlags tooltipFlag = Minecraft.getInstance().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL;
-            this.setTooltipLines(stack.getTooltip(Minecraft.getInstance().player, tooltipFlag));
+            ITooltipFlag.TooltipFlags tooltipFlag = Minecraft.getInstance().options.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL;
+            this.setTooltipLines(stack.getTooltipLines(Minecraft.getInstance().player, tooltipFlag));
         } else {
             this.setTooltipLines(Collections.emptyList());
         }
@@ -36,8 +37,8 @@ public class WidgetItemStack extends WidgetWithValue<ItemStack> {
     }
 
     @Override
-    public void draw(Screen screen) {
-        super.draw(screen);
+    public void draw(MatrixStack stack, Screen screen) {
+        super.draw(stack, screen);
 
         if(drawSlot) {
             this.drawSlot(screen);
@@ -47,7 +48,7 @@ public class WidgetItemStack extends WidgetWithValue<ItemStack> {
             return;
         }
 
-        RenderSystem.pushMatrix();
+        stack.pushPose();
 
         RenderSystem.disableLighting();
         RenderSystem.color3f(1F, 1F, 1F); //Forge: Reset color in case Items change it.
@@ -58,15 +59,15 @@ public class WidgetItemStack extends WidgetWithValue<ItemStack> {
 
         RenderSystem.scaled(xScale, yScale, 1.0d);
 
-        Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(this.value, 0, 0);
-        RenderHelper.disableStandardItemLighting();
+        Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(this.value, 0, 0);
+        RenderHelper.turnOff();
 
-        RenderSystem.popMatrix();
+        stack.popPose();
     }
 
     private void drawSlot(Screen screen) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1f);
-        screen.getMinecraft().textureManager.bindTexture(GUI.tabIcons);
+        screen.getMinecraft().textureManager.bind(GUI.tabIcons);
 
         int texOffsetY = 84;
         int texOffsetX = 84;

@@ -39,7 +39,7 @@ public abstract class SettingListEntry extends WidgetListEntry {
 
         int availableSpaceForText = columnWidth - 30;
 
-        int optionKeyStringWidth = Minecraft.getInstance().fontRenderer.getStringWidth(optionKey);
+        int optionKeyStringWidth = Minecraft.getInstance().font.width(optionKey);
         label = new WidgetTextBox(optionKey, 0xA0FFFFFF);
         label.setDimensions(2, 2, optionKeyStringWidth+1, 9);
         this.add(label);
@@ -48,7 +48,7 @@ public abstract class SettingListEntry extends WidgetListEntry {
             comment = "";
         }
 
-        String trimmedComment = Minecraft.getInstance().fontRenderer.trimStringToWidth(new StringTextComponent(comment), availableSpaceForText-13).toString();
+        String trimmedComment = Minecraft.getInstance().font.split(new StringTextComponent(comment), availableSpaceForText-13).toString();
         if(trimmedComment.length() < comment.length()) {
             trimmedComment += "...";
         }
@@ -121,7 +121,7 @@ public abstract class SettingListEntry extends WidgetListEntry {
     protected void addUnsupportedRow(int entryHeight) {
         this.setSize(columnWidth, entryHeight+17);
 
-        WidgetTextBox textBox = new WidgetTextBox(I18n.format("libnonymous.config.error.unsupported_config_type"), ColorHelper.COLOR_ERRORED.getRGB());
+        WidgetTextBox textBox = new WidgetTextBox(I18n.get("libnonymous.config.error.unsupported_config_type"), ColorHelper.COLOR_ERRORED.getRGB());
         textBox.setSize(columnWidth-10, 9);
         textBox.setPosition(25, 30);
         this.add(textBox);

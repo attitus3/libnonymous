@@ -53,10 +53,10 @@ public class WidgetContainer extends Container {
     }
 
     protected void lockSlot(int index) {
-        Slot slot = this.inventorySlots.get(index);
+        Slot slot = this.slots.get(index);
         if(slot instanceof WidgetSlot) {
             ((WidgetSlot) slot).setLocked(true);
-            this.inventorySlots.set(index, slot);
+            this.slots.set(index, slot);
         }
     }
 
@@ -92,21 +92,21 @@ public class WidgetContainer extends Container {
             ResourceLocation targetGroup = this.slotGroups.next();
             List<Integer> slotsForThisGroup = this.slotGroupMap.get(targetGroup);
             for(int slotIndex : slotsForThisGroup) {
-                WidgetSlot slot = (WidgetSlot) this.inventorySlots.get(slotIndex);
-                if(!slot.isEnabled() || slot.isLocked()) {
+                WidgetSlot slot = (WidgetSlot) this.slots.get(slotIndex);
+                if(!slot.isActive() || slot.isLocked()) {
                     continue;
                 }
 
-                if(!slot.isItemValid(stack)) {
+                if(!slot.mayPlace(stack)) {
                     continue;
                 }
 
-                if(slot.getHasStack()) {
+                if(slot.hasItem()) {
                     if(!stack.isStackable()) {
                         continue;
                     }
 
-                    ItemStack existingStack = slot.getStack();
+                    ItemStack existingStack = slot.getItem();
                     if(!existingStack.isStackable()) {
                         continue;
                     }
@@ -115,15 +115,15 @@ public class WidgetContainer extends Container {
                         continue;
                     }
 
-                    if(existingStack.getCount() >= slot.getSlotStackLimit()) {
+                    if(existingStack.getCount() >= slot.getMaxStackSize()) {
                         continue;
                     }
 
-                    if(existingStack.getCount() >= slot.getItemStackLimit(existingStack)) {
+                    if(existingStack.getCount() >= slot.getMaxStackSize(existingStack)) {
                         continue;
                     }
 
-                    if(!areItemsAndTagsEqual(stack, existingStack)) {
+                    if(!consideredTheSameItem(stack, existingStack)) {
                         continue;
                     }
                 }
@@ -137,8 +137,8 @@ public class WidgetContainer extends Container {
 
     private int getSlotStackLimit(WidgetSlot slot, ItemStack stack) {
         int limit = Integer.MAX_VALUE;
-        limit = Math.min(limit, slot.getItemStackLimit(stack));
-        limit = Math.min(limit, slot.getSlotStackLimit());
+        limit = Math.min(limit, slot.getMaxStackSize(stack));
+        limit = Math.min(limit, slot.getMaxStackSize());
         limit = Math.min(limit, stack.getMaxStackSize());
         return limit;
     }
@@ -146,7 +146,7 @@ public class WidgetContainer extends Container {
     // This method assumes that the widget slot already fulfills all required conditions.
     // See the getTransferTargetSlots method above.
     private ItemStack insertStackIntoSlot(WidgetSlot slot, ItemStack stack) {
-        ItemStack existingStack = slot.getStack();
+        ItemStack existingStack = slot.getItem();
         int fitSize = getSlotStackLimit(slot, stack);
         int remainingSpace = fitSize - existingStack.getCount();
         int toAddSize = stack.getCount();
@@ -155,7 +155,7 @@ public class WidgetContainer extends Container {
 
         ItemStack toInsert = stack.copy();
         toInsert.setCount(inserted + existingStack.getCount());
-        slot.putStack(toInsert);
+        slot.set(toInsert);
 
         ItemStack remainingStack = stack.copy();
         remainingStack.setCount(remaining);
@@ -165,39 +165,39 @@ public class WidgetContainer extends Container {
     // We are relying on the client to tell the server which slots are currently enabled,
     // see MessageEnabledSlots.
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
-        Slot uncastSlot = this.inventorySlots.get(index);
-        if(uncastSlot == null || !uncastSlot.getHasStack() || !(uncastSlot instanceof WidgetSlot)) {
+    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
+        Slot uncastSlot = this.slots.get(index);
+        if(uncastSlot == null || !uncastSlot.hasItem() || !(uncastSlot instanceof WidgetSlot)) {
             return ItemStack.EMPTY;
         }
         WidgetSlot slot = (WidgetSlot)uncastSlot;
 
-        ItemStack stackToMove = uncastSlot.getStack().copy();
+        ItemStack stackToMove = uncastSlot.getItem().copy();
         if(stackToMove.isEmpty()) {
             return ItemStack.EMPTY;
         }
 
         this.slotGroups.setPointerTo(slot.getGroupId());
-        List<Integer> availableSlotsInOrderOfPriority = getTransferTargetSlots(slot.getStack());
+        List<Integer> availableSlotsInOrderOfPriority = getTransferTargetSlots(slot.getItem());
         for(int targetSlotId : availableSlotsInOrderOfPriority) {
             if(targetSlotId == index) {
                 // Skip own slot
                 continue;
             }
 
-            WidgetSlot targetSlot = (WidgetSlot) this.inventorySlots.get(targetSlotId);
+            WidgetSlot targetSlot = (WidgetSlot) this.slots.get(targetSlotId);
             stackToMove = insertStackIntoSlot(targetSlot, stackToMove);
             if(stackToMove.isEmpty()) {
                 break;
             }
         }
 
-        slot.putStack(stackToMove);
+        slot.set(stackToMove);
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
+    public boolean stillValid(PlayerEntity playerIn) {
         return true;
     }
 }

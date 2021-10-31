@@ -59,7 +59,7 @@ public class NBTFieldHandlers {
         });
 
         // This is actually covered by INBTSerializable, but our class/interface iteration method is too strict about this.
-        addNBTHandler(ItemStack.class, (key, tag) -> ItemStack.read(tag.getCompound(key)), (key, itemStack, tag) -> tag.put(key, itemStack.serializeNBT()));
+        addNBTHandler(ItemStack.class, (key, tag) -> ItemStack.of(tag.getCompound(key)), (key, itemStack, tag) -> tag.put(key, itemStack.serializeNBT()));
 
         addNBTHandler(Enum.class, ((key, tag) -> {
             CompoundNBT enumTag = tag.getCompound(key);
@@ -132,14 +132,14 @@ public class NBTFieldHandlers {
             }
 
             CompoundNBT containerTag = tag.getCompound(key);
-            return containerTag.getUniqueId("");
+            return containerTag.getUUID("");
         }, (key, uuid, tag) -> {
             if(uuid == null) {
                 return;
             }
 
             CompoundNBT containerTag = new CompoundNBT();
-            containerTag.putUniqueId("", uuid);
+            containerTag.putUUID("", uuid);
             tag.put(key, containerTag);
         });
 

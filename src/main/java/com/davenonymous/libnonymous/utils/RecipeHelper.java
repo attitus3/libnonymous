@@ -68,7 +68,7 @@ public class RecipeHelper {
             return false;
         }
 
-        recipes.remove(ResourceLocation.tryCreate(recipeId));
+        recipes.remove(ResourceLocation.tryParse(recipeId));
         return true;
     }
 

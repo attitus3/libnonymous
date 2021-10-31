@@ -48,29 +48,29 @@ public class MultiBlockModelWorldReader implements IBlockReader, BiomeManager.IB
     }
 
     @Override
-    public float func_230487_a_(Direction p_230487_1_, boolean p_230487_2_) {
+    public float getShade(Direction p_230487_1_, boolean p_230487_2_) {
         return 0;
     }
 
     @Override
-    public WorldLightManager getLightManager() {
+    public WorldLightManager getLightEngine() {
         // TODO: blockworld might be null, what lightmanager do we use then?
-        return blockWorld.getLightManager();
+        return blockWorld.getLightEngine();
     }
 
     @Override
-    public int getBlockColor(BlockPos blockPosIn, ColorResolver colorResolverIn) {
+    public int getBlockTint(BlockPos blockPosIn, ColorResolver colorResolverIn) {
         return 0;
     }
 
     @Override
-    public int getLightFor(LightType type, BlockPos pos) {
-        return blockWorld == null ? type.defaultLightValue : blockWorld.getLightFor(type, blockPos);
+    public int getBrightness(LightType type, BlockPos pos) {
+        return blockWorld == null ? type.surrounding : blockWorld.getBrightness(type, blockPos);
     }
 
     @Nullable
     @Override
-    public TileEntity getTileEntity(BlockPos pos) {
+    public TileEntity getBlockEntity(BlockPos pos) {
         return null;
     }
 
@@ -79,7 +79,7 @@ public class MultiBlockModelWorldReader implements IBlockReader, BiomeManager.IB
         if(model.blocks.get(pos) != null) {
             return model.blocks.get(pos);
         }
-        return Blocks.AIR.getDefaultState();
+        return Blocks.AIR.defaultBlockState();
     }
 
     @Override

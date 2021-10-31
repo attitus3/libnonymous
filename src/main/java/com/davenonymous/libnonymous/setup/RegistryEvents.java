@@ -41,6 +41,6 @@ public class RegistryEvents {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public static void onParticleFactoryRegistry(final ParticleFactoryRegisterEvent event) {
-        Minecraft.getInstance().particles.registerFactory(ModObjects.blockProjectionParticleType, new BlockProjectionParticleFactory());
+        Minecraft.getInstance().particleEngine.register(ModObjects.blockProjectionParticleType, new BlockProjectionParticleFactory());
     }
 }

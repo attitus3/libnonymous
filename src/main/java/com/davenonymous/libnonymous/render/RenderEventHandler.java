@@ -19,13 +19,13 @@ public class RenderEventHandler {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public static void handleRendererForBaseObjects(RenderWorldLastEvent event) {
-        if(!Minecraft.isGuiEnabled() || Minecraft.getInstance().player == null) {
+        if(!Minecraft.renderNames() || Minecraft.getInstance().player == null) {
             return;
         }
 
         PlayerEntity player = Minecraft.getInstance().player;
-        ItemStack mainHand = player.getHeldItem(Hand.MAIN_HAND);
-        ItemStack offHand = player.getHeldItem(Hand.OFF_HAND);
+        ItemStack mainHand = player.getItemInHand(Hand.MAIN_HAND);
+        ItemStack offHand = player.getItemInHand(Hand.OFF_HAND);
 
         if(!mainHand.isEmpty()) {
             if(mainHand.getItem() instanceof BaseItem) {

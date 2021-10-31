@@ -113,28 +113,28 @@ public abstract class WidgetContainerScreen<T extends WidgetContainer> extends C
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
-        super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
+    protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
+        super.renderLabels(matrixStack, mouseX, mouseY);
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(-guiLeft, -guiTop+18, 0.0f);
+        matrixStack.pushPose();
+        matrixStack.translate(-leftPos, -topPos+18, 0.0f);
         gui.drawTooltips(matrixStack, this, mouseX, mouseY);
-        renderHoveredTooltip(matrixStack, mouseX, mouseY);
-        RenderSystem.popMatrix();
+        renderTooltip(matrixStack, mouseX, mouseY);
+        matrixStack.popPose();
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
         this.renderBackground(matrixStack);
-        gui.drawGUI(this);
+        gui.drawGUI(matrixStack, this);
 
-        if(this.container != null && this.container.inventorySlots != null) {
-            for(Slot slot : this.container.inventorySlots) {
-                if(!slot.isEnabled()) {
+        if(this.menu != null && this.menu.slots != null) {
+            for(Slot slot : this.menu.slots) {
+                if(!slot.isActive()) {
                     continue;
                 }
 
-                gui.drawSlot(this, slot, guiLeft, guiTop);
+                gui.drawSlot(matrixStack, this, slot, leftPos, topPos);
             }
         }
     }

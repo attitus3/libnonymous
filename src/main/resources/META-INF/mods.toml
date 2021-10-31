@@ -2,7 +2,7 @@
 modLoader="javafml" #mandatory
 
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[28,)" #mandatory (28 is current forge version)
+loaderVersion="[36,)" #mandatory (28 is current forge version)
 
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/thraaawn/libnonymous/issues/" #optional
@@ -52,7 +52,7 @@ gui widget framework.
     mandatory=true #mandatory
 
     # The version range of the dependency
-    versionRange="[34,)" #mandatory
+    versionRange="[36,)" #mandatory
 
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
@@ -64,6 +64,6 @@ gui widget framework.
 [[dependencies.libnonymous]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.3,1.17)"
+    versionRange="[1.16.5,1.17)"
     ordering="NONE"
     side="BOTH"

@@ -29,13 +29,13 @@ public class BlockProjectionParticle extends Particle {
     public BlockProjectionParticle(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, BlockParticleData data) {
         super((ClientWorld) worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
 
-        this.motionX = 0;
-        this.motionY = 0;
-        this.motionZ = 0;
+        this.xd = 0;
+        this.yd = 0;
+        this.zd = 0;
 
         this.data = data;
-        this.maxAge = 200;
-        this.canCollide = false;
+        this.lifetime = 200;
+        this.hasPhysics  = false;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class BlockProjectionParticle extends Particle {
     }
 
     @Override
-    public void renderParticle(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks) {
+    public void render(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks) {
         // TODO: Fix block particle rendering
         /*
         RenderSystem.pushMatrix();

@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 public class BlockProjectionParticleFactory implements IParticleFactory<BlockParticleData> {
     @Nullable
     @Override
-    public Particle makeParticle(BlockParticleData typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+    public Particle createParticle(BlockParticleData typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         return new BlockProjectionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, typeIn);
     }
 }

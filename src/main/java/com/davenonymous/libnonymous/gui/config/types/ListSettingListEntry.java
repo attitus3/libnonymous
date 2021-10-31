@@ -34,7 +34,7 @@ public class ListSettingListEntry extends SettingListEntry {
 
         this.setSize(columnWidth, entryHeight+28);
 
-        WidgetTextBox textBox = new WidgetTextBox(I18n.format("libnonymous.config.gui.label.separate_with_commas"), 0xA0CCCCCC);
+        WidgetTextBox textBox = new WidgetTextBox(I18n.get("libnonymous.config.gui.label.separate_with_commas"), 0xA0CCCCCC);
         textBox.setSize(columnWidth-10, 9);
         textBox.setPosition(2, entryHeight-4);
         this.add(textBox);

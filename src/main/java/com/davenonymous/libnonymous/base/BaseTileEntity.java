@@ -1,9 +1,11 @@
 package com.davenonymous.libnonymous.base;
 
-import com.davenonymous.libnonymous.serialization.FieldUtils;
+
 import com.davenonymous.libnonymous.serialization.nbt.NBTFieldSerializationData;
 import com.davenonymous.libnonymous.serialization.Store;
 import com.davenonymous.libnonymous.serialization.nbt.NBTFieldUtils;
+
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -45,7 +47,7 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
         }
 
         NBTFieldUtils.readFieldsFromNBT(NBTActions, this, stack.getTag(), data -> data.storeWithItem);
-        this.markDirty();
+        this.setChanged();
     }
 
     public void saveToItem(ItemStack stack) {
@@ -58,13 +60,13 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
     }
 
     public void notifyClients() {
-        world.notifyBlockUpdate(this.pos, world.getBlockState(pos), world.getBlockState(pos), 3);
+    	level.sendBlockUpdated(this.worldPosition, level.getBlockState(worldPosition), level.getBlockState(worldPosition), 3);
     }
 
     @Nullable
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(pos, 1, getUpdateTag());
+        return new SUpdateTileEntityPacket(worldPosition, 1, getUpdateTag());
     }
 
     @Override
@@ -74,7 +76,7 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        NBTFieldUtils.readFieldsFromNBT(NBTActions, this, pkt.getNbtCompound(), data -> data.sendInUpdatePackage);
+        NBTFieldUtils.readFieldsFromNBT(NBTActions, this, pkt.getTag(), data -> data.sendInUpdatePackage);
 
         /*
         // TODO: This should not be generalized in this way as it triggers on changes to blocks not belonging to this gui.
@@ -84,15 +86,15 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
         */
     }
 
-    public void read(CompoundNBT compound) {
-        super.read(getBlockState(), compound);
+    public void read(BlockState state, CompoundNBT compound) {
+        super.load(state, compound);
 
         NBTFieldUtils.readFieldsFromNBT(NBTActions, this, compound, data -> true);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
-        compound = super.write(compound);
+    public CompoundNBT save(CompoundNBT compound) {
+        compound = super.save(compound);
         compound = NBTFieldUtils.writeFieldsToNBT(NBTActions, this, compound, data -> true);
 
         return compound;
@@ -100,7 +102,7 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
 
     @Override
     public void tick() {
-        if (!this.getWorld().isRemote && !this.initialized) {
+        if (!this.getLevel().isClientSide && !this.initialized) {
             initialize();
             this.initialized = true;
         }
@@ -110,13 +112,13 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
     }
 
     protected void spawnItem(ItemStack stack) {
-        ItemEntity entityItem = new ItemEntity(world, getPos().getX()+0.5f, getPos().getY()+0.7f, getPos().getZ()+0.5f, stack);
+        ItemEntity entityItem = new ItemEntity(level, getBlockPos().getX()+0.5f, getBlockPos().getY()+0.7f, getBlockPos().getZ()+0.5f, stack);
         entityItem.lifespan = 1200;
-        entityItem.setPickupDelay(5);
+        entityItem.setPickUpDelay(5);
 
-        entityItem.setMotion(0.0f, 0.10f, 0.0f);
+        entityItem.setDeltaMovement(0.0f, 0.10f, 0.0f);
 
-        world.addEntity(entityItem);
+        level.addFreshEntity(entityItem);
     }
 
 
@@ -133,7 +135,7 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
 
 
     public int getRedstonePowerFromNeighbors() {
-        return this.world.getRedstonePowerFromNeighbors(this.pos);
+        return this.level.getBestNeighborSignal(this.worldPosition);
     }
 
     public int getIncomingRedstonePower() {
@@ -162,7 +164,7 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
     }
 
     public String getOwnerName() {
-        return world.getServer().getPlayerProfileCache().getProfileByUUID(getOwner()).getName();
+        return level.getServer().getProfileCache().get(getOwner()).getName();
     }
 
     public boolean hasOwner() {
@@ -178,14 +180,14 @@ public class BaseTileEntity extends TileEntity implements ITickableTileEntity {
             return;
         }
 
-        setOwner(player.getUniqueID());
+        setOwner(player.getUUID());
     }
 
     public boolean isWaterlogged() {
-        if(!this.world.getBlockState(this.getPos()).hasProperty(BlockStateProperties.WATERLOGGED)) {
+        if(!this.level.getBlockState(this.getBlockPos()).hasProperty(BlockStateProperties.WATERLOGGED)) {
             return false;
         }
 
-        return this.world.getBlockState(this.getPos()).get(BlockStateProperties.WATERLOGGED);
+        return this.level.getBlockState(this.getBlockPos()).getValue(BlockStateProperties.WATERLOGGED);
     }
 }

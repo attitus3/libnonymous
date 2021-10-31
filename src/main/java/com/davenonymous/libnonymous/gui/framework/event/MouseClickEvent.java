@@ -14,7 +14,7 @@ public class MouseClickEvent implements IEvent {
         this.y = mouseY;
         this.button = button;
         if(Minecraft.getInstance().player != null && Minecraft.getInstance().player.inventory != null) {
-            this.carriedStack = Minecraft.getInstance().player.inventory.getItemStack().copy();
+            this.carriedStack = Minecraft.getInstance().player.inventory.getCarried().copy();
         }
     }
 

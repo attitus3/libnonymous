@@ -55,13 +55,13 @@ public class RotationTools {
              arrowImage = new ResourceLocation(Libnonymous.MODID, "textures/particles/blockmarker.png");
         }
 
-        Minecraft.getInstance().getTextureManager().bindTexture(arrowImage);
+        Minecraft.getInstance().getTextureManager().bind(arrowImage);
 
-        matrix.push();
+        matrix.pushPose();
 
         // Shift back from camera
-        ActiveRenderInfo renderInfo = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
-        matrix.translate(-renderInfo.getProjectedView().getX(), -renderInfo.getProjectedView().getY(), -renderInfo.getProjectedView().getZ());
+        ActiveRenderInfo renderInfo = Minecraft.getInstance().gameRenderer.getMainCamera();
+        matrix.translate(-renderInfo.getPosition().x(), -renderInfo.getPosition().y(), -renderInfo.getPosition().z());
 
         // Shift to actual block position
         matrix.translate(drawPosition.getX(), drawPosition.getY(), drawPosition.getZ());
@@ -71,7 +71,7 @@ public class RotationTools {
 
         // Actually draw
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
         //IRenderTypeBuffer buffer = IRenderTypeBuffer.getImpl(bufferbuilder);
         //Minecraft.getInstance().getBlockRendererDispatcher().renderBlock(Blocks.DIAMOND_BLOCK.getDefaultState(), matrix, buffer, 15728880,  OverlayTexture.DEFAULT_LIGHT, EmptyModelData.INSTANCE);
@@ -79,9 +79,9 @@ public class RotationTools {
         // TODO: Fix arrows drawing on the ground
         rotList.fillBufferBuilder(bufferbuilder, 0.0005d);
 
-        tessellator.draw();
+        tessellator.end();
 
-        matrix.pop();
+        matrix.popPose();
     }
 
     public static Direction getFacingForPlayer(World world, PlayerEntity player) {
@@ -92,7 +92,7 @@ public class RotationTools {
             return null;
         }
 
-        Vector3d hitPosition = trace.getHitVec();
+        Vector3d hitPosition = trace.getLocation();
 
         hitPosition = hitPosition.subtract(new Vector3d(new Vector3f()));//trace.getPos()
         hitPosition = hitPosition.subtract(0.5d, 0.5d, 0.5d);
@@ -154,10 +154,10 @@ public class RotationTools {
         }
 
         public void fillBufferBuilder(BufferBuilder buffer, double yLevel) {
-            buffer.pos(0, yLevel, 1).tex(this.get(0).getA(), this.get(0).getB()).endVertex();
-            buffer.pos(1, yLevel, 1).tex(this.get(1).getA(), this.get(1).getB()).endVertex();
-            buffer.pos(1, yLevel, 0).tex(this.get(2).getA(), this.get(2).getB()).endVertex();
-            buffer.pos(0, yLevel, 0).tex(this.get(3).getA(), this.get(3).getB()).endVertex();
+            buffer.vertex(0, yLevel, 1).uv(this.get(0).getA(), this.get(0).getB()).endVertex();
+            buffer.vertex(1, yLevel, 1).uv(this.get(1).getA(), this.get(1).getB()).endVertex();
+            buffer.vertex(1, yLevel, 0).uv(this.get(2).getA(), this.get(2).getB()).endVertex();
+            buffer.vertex(0, yLevel, 0).uv(this.get(3).getA(), this.get(3).getB()).endVertex();
         }
     }
 

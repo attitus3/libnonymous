@@ -30,7 +30,7 @@ public class Networking {
     }
 
     public static void sendClipboardMessage(ServerPlayerEntity to, String clipboard) {
-        INSTANCE.sendTo(new PacketClipboard(clipboard), to.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+        INSTANCE.sendTo(new PacketClipboard(clipboard), to.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public static void sendEnabledSlotsMessage(List<Slot> inventorySlots) {
@@ -38,11 +38,11 @@ public class Networking {
     }
 
     public static void openConfigGui(ServerPlayerEntity to) {
-        INSTANCE.sendTo(new PacketOpenConfigGui(true), to.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+        INSTANCE.sendTo(new PacketOpenConfigGui(true), to.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public static void openConfigGui(ServerPlayerEntity to, String modId, CommandOpenConfigGUI.Mode mode) {
-        INSTANCE.sendTo(new PacketOpenConfigGui(modId, mode), to.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+        INSTANCE.sendTo(new PacketOpenConfigGui(modId, mode), to.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public static void reloadConfigs() {

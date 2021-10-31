@@ -17,7 +17,7 @@ public class CommandOpenConfigGUI implements Command<CommandSource> {
 
     public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
         return Commands.literal("config")
-            .requires(cs -> cs.hasPermissionLevel(0))
+            .requires(cs -> cs.hasPermission(0))
             .then(
                 Commands.argument("modid", ModIdArgument.modIdArgument())
                     .then(
@@ -26,13 +26,13 @@ public class CommandOpenConfigGUI implements Command<CommandSource> {
                     )
                     .executes(context -> {
                         final String modId = context.getArgument("modid", String.class);
-                        ServerPlayerEntity player = context.getSource().asPlayer();
+                        ServerPlayerEntity player = context.getSource().getPlayerOrException();
                         Networking.openConfigGui(player, modId, Mode.BY_SPEC);
                         return 0;
                     })
             )
             .executes(context -> {
-                ServerPlayerEntity player = context.getSource().asPlayer();
+                ServerPlayerEntity player = context.getSource().getPlayerOrException();
                 Networking.openConfigGui(player);
                 return 0;
             });
@@ -43,7 +43,7 @@ public class CommandOpenConfigGUI implements Command<CommandSource> {
         final String modId = context.getArgument("modid", String.class);
         Mode mode = context.getArgument("mode", Mode.class);
 
-        ServerPlayerEntity player = context.getSource().asPlayer();
+        ServerPlayerEntity player = context.getSource().getPlayerOrException();
         Networking.openConfigGui(player, modId, mode);
         return 0;
     }

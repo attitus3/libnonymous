@@ -1,6 +1,6 @@
 package com.davenonymous.libnonymous.base;
 
-import com.davenonymous.libnonymous.utils.RecipeData;
+import com.davenonymous.libnonymous.utils.RecipeDataBase;
 import com.davenonymous.libnonymous.utils.RecipeHelper;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BaseRecipeHelper<T extends RecipeData> {
+public class BaseRecipeHelper<T extends RecipeDataBase> {
     IRecipeType<T> recipeType;
 
     public BaseRecipeHelper(IRecipeType<T> type) {

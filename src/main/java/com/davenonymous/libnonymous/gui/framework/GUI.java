@@ -49,11 +49,11 @@ public class GUI extends WidgetPanel {
         return valueMap.get(id).getValue();
     }
 
-    public void drawGUI(Screen screen) {
+    public void drawGUI(MatrixStack stack, Screen screen) {
         this.setX((screen.width - this.width)/2);
         this.setY((screen.height - this.height)/2);
 
-        this.shiftAndDraw(screen);
+        this.shiftAndDraw(stack, screen);
     }
 
     @Override
@@ -64,16 +64,16 @@ public class GUI extends WidgetPanel {
     }
 
     @Override
-    public void draw(Screen screen) {
+    public void draw(MatrixStack stack, Screen screen) {
         drawWindow(screen);
-        super.draw(screen);
+        super.draw(stack, screen);
     }
 
     protected void drawWindow(Screen screen) {
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
 
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        screen.getMinecraft().textureManager.bindTexture(tabIcons);
+        screen.getMinecraft().textureManager.bind(tabIcons);
 
         int texOffsetY = 11;
         int texOffsetX = 64;
@@ -115,7 +115,7 @@ public class GUI extends WidgetPanel {
 
     public void drawTooltips(MatrixStack matrixStack, Screen screen, int mouseX, int mouseY) {
         Widget hoveredWidget = getHoveredWidget(mouseX, mouseY);
-        FontRenderer font = screen.getMinecraft().fontRenderer;
+        FontRenderer font = screen.getMinecraft().font;
 
         if(hoveredWidget != null && hoveredWidget.getTooltip() != null) {
             if(hoveredWidget.getTooltip().size() > 0) {
@@ -128,10 +128,10 @@ public class GUI extends WidgetPanel {
         }
     }
 
-    public void drawSlot(Screen screen, Slot slot, int guiLeft, int guiTop) {
+    public void drawSlot(MatrixStack stack, Screen screen, Slot slot, int guiLeft, int guiTop) {
         //Logz.info("Drawing slot at %dx%d", slot.xPos, slot.yPos);
 
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
 
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1f);
 
@@ -143,24 +143,24 @@ public class GUI extends WidgetPanel {
         }
         */
 
-        screen.getMinecraft().textureManager.bindTexture(tabIcons);
+        screen.getMinecraft().textureManager.bind(tabIcons);
 
         float offsetX = guiLeft-1;
         float offsetY = guiTop-1;
 
-        RenderSystem.pushMatrix();
+        stack.pushPose();
 
-        RenderSystem.translatef(offsetX, offsetY, 0.0f);
+        stack.translate(offsetX, offsetY, 0.0f);
 
         int texOffsetY = 84;
         int texOffsetX = 84;
 
         // Top Left corner
 
-        GuiUtils.drawTexturedModalRect(slot.xPos, slot.yPos, texOffsetX, texOffsetY, 18, 18, 0.0f);
+        GuiUtils.drawTexturedModalRect(slot.x, slot.y, texOffsetX, texOffsetY, 18, 18, 0.0f);
 
         RenderSystem.color4f(1f, 1f, 1f, 1f);
 
-        RenderSystem.popMatrix();
+        stack.popPose();
     }
 }

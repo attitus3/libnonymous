@@ -11,7 +11,7 @@ public class WidgetGhostSlot extends WidgetItemStack {
         super(stack, true);
 
         this.addListener(MouseClickEvent.class, (event, widget) -> {
-            ItemStack playerStack = Minecraft.getInstance().player.inventory.getItemStack().copy();
+            ItemStack playerStack = Minecraft.getInstance().player.inventory.getCarried().copy();
             this.setValue(playerStack);
             return WidgetEventResult.CONTINUE_PROCESSING;
         });

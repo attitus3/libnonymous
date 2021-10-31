@@ -63,7 +63,7 @@ public class EnumSettingListEntry extends SettingListEntry {
                 updateDefaultIconState();
                 hideErrorIcon();
             } catch (IllegalArgumentException e) {
-                showErrorIcon(I18n.format("libnonymous.config.error.invalid_enum"));
+                showErrorIcon(I18n.get("libnonymous.config.error.invalid_enum"));
             }
             return WidgetEventResult.CONTINUE_PROCESSING;
         });

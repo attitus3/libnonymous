@@ -56,7 +56,7 @@ public class FloodFill {
 
         Map<BlockPos, BlockState> result = new HashMap<>();
         for(Map.Entry<BlockPos, BlockState> blockInfo : input.entrySet()) {
-            result.put(blockInfo.getKey().add(-minX, -minY, -minZ), blockInfo.getValue());
+            result.put(blockInfo.getKey().offset(-minX, -minY, -minZ), blockInfo.getValue());
         }
 
         return result;
@@ -103,7 +103,7 @@ public class FloodFill {
                         continue;
                     }
 
-                    floodFill(world, pos.add(x, y, z), depth+1);
+                    floodFill(world, pos.offset(x, y, z), depth+1);
                 }
             }
         }

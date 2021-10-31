@@ -17,6 +17,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.math.vector.Quaternion;
+
 import org.lwjgl.opengl.GL11;
 
 public class WidgetMultiBlockModel extends Widget {
@@ -27,10 +29,10 @@ public class WidgetMultiBlockModel extends Widget {
     }
 
     @Override
-    public void draw(Screen screen) {
+    public void draw(MatrixStack stack, Screen screen) {
         float angle = RenderTickCounter.renderTicks * 45.0f / 128.0f;
 
-        RenderSystem.pushMatrix();
+        stack.pushPose();
 
         // Init RenderSystem
         RenderSystem.enableAlphaTest();
@@ -42,13 +44,13 @@ public class WidgetMultiBlockModel extends Widget {
 
         RenderSystem.disableFog();
         RenderSystem.disableLighting();
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
 
         RenderSystem.enableBlend();
         RenderSystem.enableCull();
         RenderSystem.enableAlphaTest();
 
-        if (Minecraft.isAmbientOcclusionEnabled()) {
+        if (Minecraft.useAmbientOcclusion()) {
             RenderSystem.shadeModel(GL11.GL_SMOOTH);
         } else {
             RenderSystem.shadeModel(GL11.GL_FLAT);
@@ -57,54 +59,54 @@ public class WidgetMultiBlockModel extends Widget {
         RenderSystem.disableRescaleNormal();
 
         // Bring to front
-        RenderSystem.translatef(0F, 0F, 216.5F);
+        stack.translate(0F, 0F, 216.5F);
 
-        double scaledWidth = this.width * 1.4d;
+        float scaledWidth = this.width * 1.4f;
         double scaledHeight = this.height * 1.4d;
 
-        RenderSystem.translated(scaledWidth / 2.0f, scaledHeight / 2.0f, 0.0d);
+        stack.translate(scaledWidth / 2.0f, scaledHeight / 2.0f, 0.0d);
 
         // Shift it a bit down so one can properly see 3d
-        RenderSystem.rotatef(-25.0f, 1.0f, 0.0f, 0.0f);
+        stack.mulPose(new Quaternion(-25.0f, 1.0f, 0.0f, 0.0f));
 
         // Rotate per our calculated time
-        RenderSystem.rotatef(angle, 0.0f, 1.0f, 0.0f);
+        stack.mulPose(new Quaternion(angle, 0.0f, 1.0f, 0.0f));
 
-        double scale = model.getScaleRatio(true);
-        RenderSystem.scaled(scale, scale, scale);
+        float scale = (float)model.getScaleRatio(true);
+        stack.scale(scale, scale, scale);
 
-        RenderSystem.scaled(scaledWidth, scaledWidth, scaledWidth);
+        stack.scale(scaledWidth, scaledWidth, scaledWidth);
 
 
-        RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
+        stack.mulPose(new Quaternion(180.0f, 1.0f, 0.0f, 0.0f));
 
-        RenderSystem.translatef(
+        stack.translate(
                 (model.width + 1) / -2.0f,
                 (model.height + 1) / -2.0f,
                 (model.depth + 1) / -2.0f
         );
 
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        textureManager.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
-        textureManager.getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).setBlurMipmapDirect(false, false);
+        textureManager.bind(AtlasTexture.LOCATION_BLOCKS);
+        textureManager.getTexture(AtlasTexture.LOCATION_BLOCKS).setBlurMipmap(false, false);
 
         GL11.glFrontFace(GL11.GL_CW);
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder builder = tessellator.getBuffer();
-        IRenderTypeBuffer buffer = IRenderTypeBuffer.getImpl(builder);
+        BufferBuilder builder = tessellator.getBuilder();
+        IRenderTypeBuffer buffer = IRenderTypeBuffer.immediate(builder);
 
         // TODO: Do not render with players position
-        MultiblockBlockModelRenderer.renderModel(this.model, new MatrixStack(), buffer, 15728880,  OverlayTexture.NO_OVERLAY, Libnonymous.proxy.getClientWorld(), Libnonymous.proxy.getClientPlayer().getPosition());
+        MultiblockBlockModelRenderer.renderModel(this.model, new MatrixStack(), buffer, 15728880,  OverlayTexture.NO_OVERLAY, Libnonymous.proxy.getClientWorld(), Libnonymous.proxy.getClientPlayer().blockPosition());
 
-        textureManager.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
-        textureManager.getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
+        textureManager.bind(AtlasTexture.LOCATION_BLOCKS);
+        textureManager.getTexture(AtlasTexture.LOCATION_BLOCKS).restoreLastBlurMipmap();
 
-        ((IRenderTypeBuffer.Impl) buffer).finish();
+        ((IRenderTypeBuffer.Impl) buffer).endBatch();
 
         GL11.glFrontFace(GL11.GL_CCW);
 
         RenderSystem.disableBlend();
 
-        RenderSystem.popMatrix();
+        stack.popPose();
     }
 }

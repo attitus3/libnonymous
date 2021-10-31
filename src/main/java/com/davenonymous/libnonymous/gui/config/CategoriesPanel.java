@@ -14,7 +14,7 @@ public class CategoriesPanel extends WidgetPanel {
         this.setSize(columnWidths, desiredHeight/2);
         this.setVisible(false);
 
-        WidgetTextBox labelCategories = new WidgetTextBox(I18n.format("libnonymous.config.gui.label.category"), 0xC0000000);
+        WidgetTextBox labelCategories = new WidgetTextBox(I18n.get("libnonymous.config.gui.label.category"), 0xC0000000);
         labelCategories.setDimensions(0, 6, columnWidths, 9);
         this.add(labelCategories);
 

@@ -26,7 +26,7 @@ public class BlockStateSerializationHelper {
             CompoundNBT propertiesTag = new CompoundNBT();
 
             for (final Property property : state.getProperties()) {
-                propertiesTag.putString(property.getName(), state.get(property).toString());
+                propertiesTag.putString(property.getName(), state.getValue(property).toString());
             }
 
             result.put("properties", propertiesTag);
@@ -41,32 +41,32 @@ public class BlockStateSerializationHelper {
             return null;
         }
 
-        ResourceLocation blockId = ResourceLocation.tryCreate(nbt.getString("block"));
+        ResourceLocation blockId = ResourceLocation.tryParse(nbt.getString("block"));
         final Block block = ForgeRegistries.BLOCKS.getValue(blockId);
         if(block == null) {
             Logz.warn("Unknown block {} in NBT package", nbt.getString("block"));
             return null;
         }
 
-        BlockState state = block.getDefaultState();
+        BlockState state = block.defaultBlockState();
         if(nbt.contains("properties")) {
             CompoundNBT propertiesTag = nbt.getCompound("properties");
-            for(String propertyName : propertiesTag.keySet()) {
-                final Property blockProperty = block.getStateContainer().getProperty(propertyName);
+            for(String propertyName : propertiesTag.getAllKeys()) {
+                final Property blockProperty = block.getStateDefinition().getProperty(propertyName);
                 if(blockProperty == null) {
                     Logz.warn("The property '{}' is not valid for block {}", propertyName, blockId);
                     continue;
                 }
 
                 String valueString = propertiesTag.getString(propertyName);
-                final Optional<Comparable> propValue = blockProperty.parseValue(valueString);
+                final Optional<Comparable> propValue = blockProperty.getValue(valueString);
                 if (!propValue.isPresent()) {
                     Logz.warn("The property '{}' with value '{}' could not be parsed!", propertyName, valueString);
                     continue;
                 }
 
                 try {
-                    state = state.with(blockProperty, propValue.get());
+                    state = state.setValue(blockProperty, propValue.get());
                 } catch (final Exception e) {
                     Logz.warn("Failed to update state for block {}. The mod that adds this block has issues.", block.getRegistryName());
                     continue;
@@ -84,8 +84,8 @@ public class BlockStateSerializationHelper {
         buffer.writeInt(properties.size());
 
         for (final Property property : properties) {
-            buffer.writeString(property.getName());
-            buffer.writeString(state.get(property).toString());
+            buffer.writeUtf(property.getName());
+            buffer.writeUtf(state.getValue(property).toString());
         }
     }
 
@@ -96,22 +96,22 @@ public class BlockStateSerializationHelper {
         if (block != null) {
             final int size = buffer.readInt();
 
-            BlockState state = block.getDefaultState();
+            BlockState state = block.defaultBlockState();
             for (int i = 0; i < size; i++) {
-                final String propName = buffer.readString();
-                final String value = buffer.readString();
+                final String propName = buffer.readUtf();
+                final String value = buffer.readUtf();
 
                 // Check the block for the property. Keys = property names.
-                final Property blockProperty = block.getStateContainer().getProperty(propName);
+                final Property blockProperty = block.getStateDefinition().getProperty(propName);
 
                 if (blockProperty != null) {
                     // Attempt to parse the value with the the property.
-                    final Optional<Comparable> propValue = blockProperty.parseValue(value);
+                    final Optional<Comparable> propValue = blockProperty.getValue(value);
 
                     if (propValue.isPresent()) {
                         // Update the state with the new property.
                         try {
-                            state = state.with(blockProperty, propValue.get());
+                            state = state.setValue(blockProperty, propValue.get());
                         } catch (final Exception e) {
                             Logz.error("Failed to read state for block {}. The mod that adds this block has issues.", block.getRegistryName());
                         }
@@ -122,7 +122,7 @@ public class BlockStateSerializationHelper {
             return state;
         }
 
-        return Blocks.AIR.getDefaultState();
+        return Blocks.AIR.defaultBlockState();
     }
 
     public static JsonObject serializeBlockState (BlockState state) {
@@ -134,7 +134,7 @@ public class BlockStateSerializationHelper {
             JsonObject propertiesObj = new JsonObject();
 
             for (final Property property : state.getProperties()) {
-                propertiesObj.addProperty(property.getName(), state.get(property).toString());
+                propertiesObj.addProperty(property.getName(), state.getValue(property).toString());
             }
 
             result.add("properties", propertiesObj);
@@ -163,7 +163,7 @@ public class BlockStateSerializationHelper {
         final Block block = MCJsonUtils.getBlock(json, "block");
 
         // Start off with the default state.
-        BlockState state = block.getDefaultState();
+        BlockState state = block.defaultBlockState();
 
         // If the properties member exists, attempt to assign properties to the block state.
         if (json.has("properties")) {
@@ -179,7 +179,7 @@ public class BlockStateSerializationHelper {
                 for (final Map.Entry<String, JsonElement> property : props.entrySet()) {
 
                     // Check the block for the property. Keys = property names.
-                    final Property blockProperty = block.getStateContainer().getProperty(property.getKey());
+                    final Property blockProperty = block.getStateDefinition().getProperty(property.getKey());
 
                     if (blockProperty != null) {
 
@@ -187,14 +187,14 @@ public class BlockStateSerializationHelper {
 
                             // Attempt to parse the value with the the property.
                             final String valueString = property.getValue().getAsString();
-                            final Optional<Comparable> propValue = blockProperty.parseValue(valueString);
+                            final Optional<Comparable> propValue = blockProperty.getValue(valueString);
 
                             if (propValue.isPresent()) {
 
                                 // Update the state with the new property.
                                 try {
 
-                                    state = state.with(blockProperty, propValue.get());
+                                    state = state.setValue(blockProperty, propValue.get());
                                 }
 
                                 catch (final Exception e) {
@@ -210,7 +210,7 @@ public class BlockStateSerializationHelper {
 
                         else {
 
-                            throw new JsonSyntaxException("Expected property value for " + property.getKey() + " to be primitive string. Got " + JSONUtils.toString(property.getValue()));
+                            throw new JsonSyntaxException("Expected property value for " + property.getKey() + " to be primitive string. Got " + JSONUtils.getType(property.getValue()));
                         }
                     }
 
@@ -223,7 +223,7 @@ public class BlockStateSerializationHelper {
 
             else {
 
-                throw new JsonSyntaxException("Expected properties to be an object. Got " + JSONUtils.toString(propertiesElement));
+                throw new JsonSyntaxException("Expected properties to be an object. Got " + JSONUtils.getType(propertiesElement));
             }
         }
 

@@ -48,34 +48,34 @@ public class PacketBufferFieldHandlers {
         addIOHandler(long.class, buf -> buf.readLong(), (l, buf) -> buf.writeLong(l));
         addIOHandler(Long.class, buf -> buf.readLong(), (l, buf) -> buf.writeLong(l));
 
-        addIOHandler(String.class, buf -> buf.readString(), (s, buf) -> buf.writeString(s));
+        addIOHandler(String.class, buf -> buf.readUtf(), (s, buf) -> buf.writeUtf(s));
 
-        addIOHandler(ItemStack.class, buf -> buf.readItemStack(), (itemStack, buf) -> buf.writeItemStack(itemStack));
+        addIOHandler(ItemStack.class, buf -> buf.readItem(), (itemStack, buf) -> buf.writeItem(itemStack));
 
-        addIOHandler(Ingredient.class, buf -> Ingredient.read(buf), (ingredient, buf) -> ingredient.write(buf));
+        addIOHandler(Ingredient.class, buf -> Ingredient.fromNetwork(buf), (ingredient, buf) -> ingredient.toNetwork(buf));
 
         addIOHandler(Enum.class, buf -> {
             try {
-                Class clz = Class.forName(buf.readString());
-                return buf.readEnumValue(clz);
+                Class clz = Class.forName(buf.readUtf());
+                return buf.readEnum(clz);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
             return null;
         }, (anEnum, buf) -> {
-            buf.writeString(anEnum.getClass().getName());
-            buf.writeEnumValue(anEnum);
+            buf.writeUtf(anEnum.getClass().getName());
+            buf.writeEnum(anEnum);
         });
 
         addIOHandler(Class.class, buf -> {
             try {
-                return Class.forName(buf.readString());
+                return Class.forName(buf.readUtf());
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
             return null;
-        }, (aClass, buf) -> buf.writeString(aClass.getName()));
+        }, (aClass, buf) -> buf.writeUtf(aClass.getName()));
 
         addIOHandler(ResourceLocation.class, buf -> buf.readResourceLocation(), (resourceLocation, buf) -> buf.writeResourceLocation(resourceLocation));
 
@@ -85,10 +85,10 @@ public class PacketBufferFieldHandlers {
             buf -> BlockStateSerializationHelper.deserializeBlockState(buf),
             (blockState, buf) -> BlockStateSerializationHelper.serializeBlockState(buf, blockState));
 
-        addIOHandler(UUID.class, buf -> buf.readUniqueId(), (uuid, buf) -> buf.writeUniqueId(uuid));
+        addIOHandler(UUID.class, buf -> buf.readUUID(), (uuid, buf) -> buf.writeUUID(uuid));
 
         addIOHandler(INBTSerializable.class, buf -> {
-            CompoundNBT store = buf.readCompoundTag();
+            CompoundNBT store = buf.readNbt();
             INBT v = store.get("v");
             String className = store.getString("c");
             try {
@@ -105,7 +105,7 @@ public class PacketBufferFieldHandlers {
             CompoundNBT store = new CompoundNBT();
             store.putString("c", inbtSerializable.getClass().getName());
             store.put("v", inbtSerializable.serializeNBT());
-            buf.writeCompoundTag(store);
+            buf.writeNbt(store);
         });
 
         addIOHandler(Map.class, buf -> {
@@ -116,13 +116,13 @@ public class PacketBufferFieldHandlers {
 
             Map result = new HashMap();
             try {
-                Class keyClass = Class.forName(buf.readString());
+                Class keyClass = Class.forName(buf.readUtf());
                 if (!hasIOHandler(keyClass)) {
                     Logz.warn("No PacketBuffer deserialization methods for keys in map (type='{}') exists.", keyClass);
                     return Collections.emptyMap();
                 }
 
-                Class valueClass = Class.forName(buf.readString());
+                Class valueClass = Class.forName(buf.readUtf());
                 if (!hasIOHandler(valueClass)) {
                     Logz.warn("No PacketBuffer deserialization methods for values in map (type='{}') exists.", valueClass);
                     return Collections.emptyMap();
@@ -160,8 +160,8 @@ public class PacketBufferFieldHandlers {
                     return;
                 }
 
-                buf.writeString(keyClass.getName());
-                buf.writeString(valueClass.getName());
+                buf.writeUtf(keyClass.getName());
+                buf.writeUtf(valueClass.getName());
                 buf.writeInt(map.entrySet().size());
 
                 Writer keyWriter = getIOHandler(keyClass).getRight();
@@ -183,7 +183,7 @@ public class PacketBufferFieldHandlers {
 
             ArrayList result = new ArrayList();
             try {
-                Class valueClass = Class.forName(buf.readString());
+                Class valueClass = Class.forName(buf.readUtf());
                 if (!hasIOHandler(valueClass)) {
                     Logz.warn("No PacketBuffer deserialization methods for values in list (type='{}') exists.", valueClass);
                     return Collections.emptyList();
@@ -211,7 +211,7 @@ public class PacketBufferFieldHandlers {
                     return;
                 }
 
-                buf.writeString(valueClass.getName());
+                buf.writeUtf(valueClass.getName());
                 buf.writeInt(list.size());
 
                 Writer valueWriter = getIOHandler(valueClass).getRight();
@@ -228,7 +228,7 @@ public class PacketBufferFieldHandlers {
 
             ArrayDeque result = new ArrayDeque<>();
             try {
-                Class valueClass = Class.forName(buf.readString());
+                Class valueClass = Class.forName(buf.readUtf());
                 if (!hasIOHandler(valueClass)) {
                     Logz.warn("No PacketBuffer deserialization methods for values in list (type='{}') exists.", valueClass);
                     return new ArrayDeque<>();
@@ -256,7 +256,7 @@ public class PacketBufferFieldHandlers {
                     return;
                 }
 
-                buf.writeString(valueClass.getName());
+                buf.writeUtf(valueClass.getName());
                 buf.writeInt(queue.size());
 
                 Writer valueWriter = getIOHandler(valueClass).getRight();

@@ -50,7 +50,7 @@ public class PacketOpenConfigGuiHandler implements Consumer<PacketOpenConfigGui>
                 .map(m -> m.getSpec())
                 .collect(Collectors.toList());
 
-        Minecraft.getInstance().displayGuiScreen(new WidgetGuiConfig(parent, configSpecs));
+        Minecraft.getInstance().setScreen(new WidgetGuiConfig(parent, configSpecs));
     }
 
     @Override
@@ -66,15 +66,15 @@ public class PacketOpenConfigGuiHandler implements Consumer<PacketOpenConfigGui>
                     if(optExtPoint.isPresent()) {
                         BiFunction<Minecraft, Screen, Screen> configGuiFactory = optExtPoint.get();
                         Screen screen = configGuiFactory.apply(Minecraft.getInstance(), null);
-                        Minecraft.getInstance().displayGuiScreen(screen);
+                        Minecraft.getInstance().setScreen(screen);
                     } else {
-                        Minecraft.getInstance().player.sendStatusMessage(new TranslationTextComponent("libnonymous.config.error.no_native_menu_exists"), false);
+                        Minecraft.getInstance().player.displayClientMessage(new TranslationTextComponent("libnonymous.config.error.no_native_menu_exists"), false);
                     }
                 } else if(packet.mode == CommandOpenConfigGUI.Mode.BY_SPEC) {
                     EnumMap<ModConfig.Type, ModConfig> configs = getConfigsForModContainer(modContainer);
                     if(configs != null) {
                         List<ForgeConfigSpec> configSpecs = configs.values().stream().map(ModConfig::getSpec).collect(Collectors.toList());
-                        Minecraft.getInstance().displayGuiScreen(new WidgetGuiConfig(null, configSpecs));
+                        Minecraft.getInstance().setScreen(new WidgetGuiConfig(null, configSpecs));
                     }
                 }
             }

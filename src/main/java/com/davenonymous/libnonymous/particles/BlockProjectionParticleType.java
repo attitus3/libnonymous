@@ -14,11 +14,11 @@ public class BlockProjectionParticleType extends ParticleType<BlockParticleData>
     }
 
     public static void spawn(ServerWorld world, BlockPos pos, BlockState state) {
-        world.spawnParticle(new BlockParticleData(ModObjects.blockProjectionParticleType, state), pos.getX(), pos.getY(), pos.getZ(), 1, 0 ,0, 0, 0 );
+        world.sendParticles(new BlockParticleData(ModObjects.blockProjectionParticleType, state), pos.getX(), pos.getY(), pos.getZ(), 1, 0 ,0, 0, 0 );
     }
 
     @Override
-    public Codec<BlockParticleData> func_230522_e_() {
-        return null;
+    public Codec<BlockParticleData> codec() {
+        return BlockParticleData.codec(this);
     }
 }

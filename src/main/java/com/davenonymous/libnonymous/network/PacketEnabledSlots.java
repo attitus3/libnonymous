@@ -21,7 +21,7 @@ public class PacketEnabledSlots extends BasePacket {
 
         int index = 0;
         for(Slot slot : slots) {
-            this.enabledSlots[index] = slot.isEnabled();
+            this.enabledSlots[index] = slot.isActive();
             index++;
         }
     }
@@ -39,7 +39,7 @@ public class PacketEnabledSlots extends BasePacket {
     public void doWork(Supplier<NetworkEvent.Context> ctx) {
         ServerPlayerEntity serverPlayer = ctx.get().getSender();
         int index = 0;
-        for(Slot slot : serverPlayer.openContainer.inventorySlots) {
+        for(Slot slot : serverPlayer.containerMenu.slots) {
             if(slot instanceof WidgetSlot) {
                 if(index >= this.enabledSlots.length) {
                     break;

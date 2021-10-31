@@ -2,8 +2,9 @@ package com.davenonymous.libnonymous.gui.framework.widgets;
 
 import com.davenonymous.libnonymous.gui.framework.event.*;
 import com.davenonymous.libnonymous.network.Networking;
-import com.davenonymous.libnonymous.utils.Logz;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.matrix.MatrixStack;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 
@@ -47,8 +48,8 @@ public class WidgetPanel extends Widget {
         });
 
         this.addListener(VisibilityChangedEvent.class, (event, widget1) -> {
-            if(Minecraft.getInstance().player != null && Minecraft.getInstance().player.openContainer != null) {
-                Networking.sendEnabledSlotsMessage(Minecraft.getInstance().player.openContainer.inventorySlots);
+            if(Minecraft.getInstance().player != null && Minecraft.getInstance().player.containerMenu != null) {
+                Networking.sendEnabledSlotsMessage(Minecraft.getInstance().player.containerMenu.slots);
             }
             return WidgetEventResult.CONTINUE_PROCESSING;
         });
@@ -159,13 +160,13 @@ public class WidgetPanel extends Widget {
     }
 
     @Override
-    public void draw(Screen screen) {
+    public void draw(MatrixStack stack, Screen screen) {
         for(Widget child : children) {
             if(!child.visible) {
                 continue;
             }
 
-            child.shiftAndDraw(screen);
+            child.shiftAndDraw(stack, screen);
         }
     }
 

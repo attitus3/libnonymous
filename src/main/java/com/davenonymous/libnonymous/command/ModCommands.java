@@ -9,7 +9,7 @@ public class ModCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         LiteralCommandNode<CommandSource> cmdLibnonymous = dispatcher.register(
             Commands.literal("libnonymous")
-                .then(CommandOpenConfigGUI.register(dispatcher))
+                //.then(CommandOpenConfigGUI.register(dispatcher))
         );
     }
 }
